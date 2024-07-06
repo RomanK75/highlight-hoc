@@ -1,6 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState,PropsWithChildren } from 'react';
 
-function New(props) {
+
+type data = {
+  type: string;
+  url?: string;
+  views: number;
+  title?: string;
+}
+
+
+const withWrapper = (Component: React.ComponentType<data>)=> {
+  return (props: data) => {
+    if (props.views > 1000) {
+      return <Popular><Component  {...props}/></Popular>
+    }
+    else if (props.views < 100) {
+      return <New><Component  {...props}/></New>
+    }
+    else {
+      return <Component {...props} />
+    }
+  }
+}
+
+const WrappedArticle = withWrapper(Article)
+const WrappedVideo = withWrapper(Video)
+
+
+function New(props: PropsWithChildren) {
     return (
         <div className="wrap-item wrap-item-new">
             <span className="label">New!</span>
@@ -9,7 +36,7 @@ function New(props) {
     )
 };
 
-function Popular(props) {
+function Popular(props: PropsWithChildren) {
     return (
         <div className="wrap-item wrap-item-popular">
             <span className="label">Popular!</span>
@@ -18,7 +45,7 @@ function Popular(props) {
     )
 };
 
-function Article(props) {
+function Article(props:data) {
     return (
         <div className="item item-article">
             <h3><a href="#">{props.title}</a></h3>
@@ -27,26 +54,28 @@ function Article(props) {
     )
 };
 
-function Video(props) {
+function Video(props: data) {
     return (
         <div className="item item-video">
-            <iframe src={props.url} frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            <iframe src={props.url}  allow="autoplay; encrypted-media; fullscreen"></iframe>
             <p className="views">Просмотров: {props.views}</p>
         </div>
     )
 };
 
-function List(props) {
+
+function List(props:{list:data[]}) {
     return props.list.map(item => {
         switch (item.type) {
             case 'video':
                 return (
-                    <Video {...item} />
-                );
+                    <WrappedVideo {...item} />
+                  );
+                  
+                  case 'article':
+                    return (
+                    <WrappedArticle {...item} />
 
-            case 'article':
-                return (
-                    <Article {...item} />
                 );
         }
     });
